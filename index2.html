@@ -1,0 +1,115 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dino Game</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f4f4f4; font-family: sans-serif; }
+    .game {
+      position: relative;
+      width: 100%;
+      height: 900px;
+      background-image: url(images/bg2.png);
+      background-repeat: repeat-x;
+      background-size: cover;
+      background-position: center;
+      overflow: hidden;
+      animation: bg-move 15s linear infinite;
+    }
+    .dino {
+      position: absolute;
+      bottom: 160px;
+      left: 50px;
+      width: 50px;
+    }
+    .dino img{
+      width: 50px;
+    }
+    .obstacle{
+      position: absolute;
+      bottom: 160px;
+      width: 50px;
+      animation: move 3s linear infinite;
+    }
+    .obstacle img{
+      width: 50px;
+    }
+    @keyframes bg-move {
+      0% { background-position-x: 0; }
+      100% { background-position-x: -7788px; } 
+    }
+
+    @keyframes move {
+      0% { right: -20px; }
+      100% { right: 100%; }
+    }
+    .jump {
+      animation: jump 0.5s ease-out;
+    }
+    @keyframes jump {
+      0% { bottom: 160px; }
+      50% { bottom: 300px; }
+      100% { bottom: 160px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="game" id="game">
+    <div class="dino" id="dino"><img src="images/rabbit.png" alt=""></div>
+    <div class="obstacle" id="rock"><img src="images/rock.png" alt=""></div>    
+  </div>
+
+  <script>
+    const dino = document.getElementById('dino');
+
+    document.addEventListener('keydown', function(event) {
+      if (event.code === 'Space' || event.code === 'ArrowUp') {
+        if (!dino.classList.contains('jump')) {
+          dino.classList.add('jump');
+          setTimeout(() => {
+            dino.classList.remove('jump');
+          }, 500);
+        }
+      }
+    });
+
+    let x = 100; //x 축
+    let y = 0; //y축, 위로올라가면 -값
+    let vy = 0; //속도
+    let jumping = false; //jumping = false 가만히 있는상태, true면 점프중 상태
+    
+    document.addEventListener('keydown', e => {
+      if(e.key === 'ArrowRight'){x += 10;}
+      if(e.key === 'ArrowLeft'){ x -= 10;}
+      if(e.key === ' ' && !jumping){ //공백문자 = 스페이스바
+        vy = -20;
+        jumping = true;
+      }
+      document.getElementById('dino').style.left = x + 'px';
+    });
+
+    setInterval(()=> {
+      if(jumping){
+        vy += 1;
+        y += vy; //속도 and 높이
+      }
+      if(y >= 0){
+        y = 0;
+        vy = 0;
+        jumping = false;
+      }
+      document.getElementById('').style.bottom = -y + "px";
+    }, 30);
+
+  setInterval(checkCollision, 10);
+
+
+
+  
+
+  </script>
+  
+</body>
+</html>

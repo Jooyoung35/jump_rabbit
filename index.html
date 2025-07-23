@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🐰Jump Jump🎈</title>
+  <style>
+    body {
+      margin: 0;
+      overflow-x: hidden; 
+    }
+    .bg{
+      position: relative;
+      width: 100%;
+      height: 919px;
+      overflow: hidden;
+      background-image: url(images/bg2.png);
+      background-repeat: repeat-x;
+      background-size: auto;
+      background-position: center;
+      animation: bg-move 23s linear infinite;
+    }
+    #player{
+      width: 50px;
+      position: absolute;
+      bottom: 0px; left: 100px;
+    }
+    .qq{
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      bottom: 90px; left: 0px;
+      background-size: cover;
+      background-repeat: no-repeat;
+      border-radius: 10px;
+    }
+    .aa{
+      background-image: url(images/rock.png);
+      left: 1200px;
+    }
+    .bb{
+      background-image: url(images/brocoli.png);
+      left: 500px;
+    }
+    .cc{
+      background-image: url(images/carrot.png);
+      left: 700px;
+    }
+    .dd{
+      background-image: url(images/star.png);
+      left: 950px;
+    }
+
+    #game-over {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      color: white;
+      font-size: 2em;
+      text-align: center;
+      padding-top: 200px;
+      z-index: 9999;
+    }
+
+    #game-over button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg">
+    <img src="images/rabbit.png" alt="" id="player">
+    <div class="aa qq"></div>
+    <div class="bb qq"></div>
+    <div class="cc qq"></div>
+    <div class="dd qq"></div>
+  </div>
+
+  <!-- 커스텀 게임오버 화면 -->
+  <div id="game-over">
+    게임 오버!<br>
+    <button onclick="restartGame()">다시 시작</button>
+  </div>
+
+  <script>
+    let x = 100;
+    let y = 0;
+    let vy = 0;
+    let jumping = false;
+
+    const player = document.getElementById('player');
+    const obstacles = document.querySelectorAll('.qq');
+    const obstaclePositions = [];
+
+    // 장애물 초기 위치 저장
+    obstacles.forEach((ob, i) => {
+      const spacing = 300;
+      const startOffset = 1000;
+      const left = 500 + i * spacing;
+      obstaclePositions.push(left);
+      ob.style.left = left + 'px';
+    });
+
+    const baseBottom = 90;
+
+    document.addEventListener('keydown', e => {
+      if(e.key === 'ArrowRight') x += 10;
+      if(e.key === 'ArrowLeft') x -= 10;
+      if(e.key === ' ' && !jumping){
+        vy = -15;
+        jumping = true;
+      }
+      player.style.left = x + 'px';
+    });
+
+    function isColliding(a, b) {
+      const rect1 = a.getBoundingClientRect();
+      const rect2 = b.getBoundingClientRect();
+      const buffer = 70; // ← 충돌 감지 여유 거리. 숫자가 클수록 "붙어야만" 충돌됨
+      return !(
+        rect1.right < rect2.left || 
+        rect1.left > rect2.right || 
+        rect1.bottom < rect2.top || 
+        rect1.top > rect2.bottom
+      );
+    }
+
+    function gameOver() {
+      clearInterval(gameLoop);
+      clearInterval(obstacleLoop);
+      document.getElementById('game-over').style.display = 'block';
+    }
+
+    function restartGame() {
+      // 위치 초기화
+      x = 100;
+      y = 0;
+      vy = 0;
+      jumping = false;
+      player.style.left = x + 'px';
+      player.style.bottom = (baseBottom - y) + 'px';
+
+      obstaclePositions.forEach((_, i) => {
+        const spacing = 300;
+        const startOffset = 1000;
+        const left = 500 + i * spacing;
+        obstaclePositions[i] = left;
+        obstacles[i].style.left = left + 'px';
+      });
+
+      document.getElementById('game-over').style.display = 'none';
+
+      gameLoop = setInterval(updateJump, 30);
+      obstacleLoop = setInterval(updateObstacles, 30);
+    }
+
+    function updateJump() {
+      if(jumping){
+        vy += 1;
+        y += vy;
+      }
+      if(y >= 0){
+        y = 0;
+        vy = 0;
+        jumping = false;
+      }
+      player.style.bottom = (baseBottom - y) + 'px';
+    }
+
+    function updateObstacles() {
+      obstacles.forEach((obstacle, idx) => {
+        obstaclePositions[idx] -= 5;
+        obstacle.style.left = obstaclePositions[idx] + 'px';
+
+        if (obstaclePositions[idx] < -50) {
+          obstaclePositions[idx] = window.innerWidth + Math.random() * 300;
+        }
+
+        if (isColliding(player, obstacle)) {
+          gameOver();
+        }
+      });
+    }
+
+    let gameLoop = setInterval(updateJump, 30);
+    let obstacleLoop = setInterval(updateObstacles, 30);
+  </script>
+</body>
+</html>
